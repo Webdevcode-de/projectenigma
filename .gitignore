@@ -11,12 +11,12 @@ venv/
 
 # Database
 db.sqlite3
-users.db
+/users.db
 
-# Generated challenge files
-server_boot.log
-remediation_challenge/
-remediation_challenge.zip
+# Generated challenge files (root level only)
+/server_boot.log
+/remediation_challenge/
+/remediation_challenge.zip
 
 # IDE
 .vscode/
