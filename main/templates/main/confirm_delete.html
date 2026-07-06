@@ -1,0 +1,59 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block title %}PROJECT ENIGMA — Confirm Delete{% endblock %}
+
+{% block extra_css %}
+    .confirm-page { padding: 4rem 0; }
+    .confirm-page .container { max-width: 520px; margin: 0 auto; padding: 0 2rem; }
+    .confirm-card {
+        background: var(--bg-card);
+        border: 1px solid rgba(239,68,68,0.2);
+        border-radius: 12px;
+        padding: 2.5rem;
+        text-align: center;
+    }
+    .confirm-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .confirm-title {
+        font-family: var(--font-mono);
+        font-weight: 700;
+        font-size: 1.3rem;
+        margin-bottom: 0.75rem;
+    }
+    .confirm-desc {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        line-height: 1.6;
+    }
+    .confirm-name {
+        font-family: var(--font-mono);
+        color: var(--status-hard);
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 2rem;
+    }
+    .confirm-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+{% endblock %}
+
+{% block content %}
+<div class="confirm-page">
+    <div class="container">
+        <div class="confirm-card">
+            <div class="confirm-icon">⚠️</div>
+            <h1 class="confirm-title">Delete {{ type }}</h1>
+            <p class="confirm-desc">Are you sure you want to delete this {{ type|lower }}? This action cannot be undone.</p>
+            <p class="confirm-name">"{{ object.title }}"</p>
+            <form method="post" class="confirm-actions">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary" style="background:var(--status-hard);box-shadow:none;">Delete</button>
+                <a href="{% url cancel_url cancel_arg %}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

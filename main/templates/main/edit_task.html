@@ -1,0 +1,166 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block title %}PROJECT ENIGMA — Edit Task{% endblock %}
+
+{% block extra_css %}
+    .form-page { padding: 3rem 0 4rem; }
+    .form-page .container { max-width: 720px; margin: 0 auto; padding: 0 2rem; }
+    .form-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+    }
+    .form-title {
+        font-family: var(--font-mono);
+        font-weight: 700;
+        font-size: 1.4rem;
+        margin-bottom: 0.5rem;
+    }
+    .form-desc {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        margin-bottom: 2rem;
+    }
+    .form-group { margin-bottom: 1.5rem; }
+    .form-label {
+        display: block;
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+    .form-input, .form-select, .form-textarea {
+        width: 100%;
+        padding: 0.7rem 0.9rem;
+        background: var(--bg-primary);
+        border: 1px solid var(--border-subtle);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-family: var(--font-mono);
+        font-size: 0.9rem;
+        transition: border-color var(--transition-fast);
+        outline: none;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        border-color: var(--accent-cyan);
+        box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.1);
+    }
+    .form-textarea { min-height: 100px; resize: vertical; line-height: 1.6; }
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        align-items: center;
+    }
+    .file-upload-zone {
+        border: 2px dashed var(--border-subtle);
+        border-radius: 8px;
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        color: var(--text-muted);
+    }
+    .file-upload-zone:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+
+    .existing-file {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 0.75rem;
+        background: var(--bg-primary);
+        border: 1px solid var(--border-subtle);
+        border-radius: 6px;
+        margin-bottom: 0.4rem;
+    }
+    .existing-file-name {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        flex: 1;
+    }
+{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <div class="container">
+        <div class="form-card">
+            <h1 class="form-title">Edit Task</h1>
+            <p class="form-desc">
+                in challenge <strong style="color:var(--accent-cyan);">{{ task.challenge.title }}</strong>
+            </p>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label class="form-label" for="title">Title</label>
+                    <input type="text" name="title" id="title" class="form-input" value="{{ task.title }}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="description">Description</label>
+                    <textarea name="description" id="description" class="form-textarea">{{ task.description }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="flag">Flag</label>
+                    <input type="text" name="flag" id="flag" class="form-input" value="{{ task.flag }}" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="answer_format">Answer Format</label>
+                        <input type="text" name="answer_format" id="answer_format" class="form-input" value="{{ task.answer_format }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="order">Order</label>
+                        <input type="number" name="order" id="order" class="form-input" value="{{ task.order }}" min="1">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Current Files</label>
+                    {% with files=task.files.all %}
+                    {% if files %}
+                    {% for file in files %}
+                    <div class="existing-file">
+                        <span class="existing-file-name">{{ file.display_name }}</span>
+                        <form method="post" style="display:inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="file_id" value="{{ file.id }}">
+                            <button type="submit" name="delete_file" value="1" class="btn btn-secondary btn-sm" style="border-color:rgba(239,68,68,0.3);color:var(--status-hard);padding:0.25rem 0.6rem;font-size:0.7rem;">Remove</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p style="color:var(--text-muted);font-size:0.8rem;font-style:italic;">No files attached.</p>
+                    {% endif %}
+                    {% endwith %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Add Files</label>
+                    <div class="file-upload-zone" onclick="document.getElementById('fileInput').click()">
+                        <p style="font-family:var(--font-mono);font-size:0.85rem;">Click to upload files</p>
+                    </div>
+                    <input type="file" name="files" id="fileInput" multiple style="display:none">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <a href="{% url 'edit_challenge' task.challenge.id %}" class="btn btn-secondary">Back to Challenge</a>
+                    <a href="{% url 'delete_task' task.id %}" class="btn btn-secondary" style="border-color:rgba(239,68,68,0.3);color:var(--status-hard);margin-left:auto;">Delete</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

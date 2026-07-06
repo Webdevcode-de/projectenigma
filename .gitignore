@@ -1,0 +1,28 @@
+# Python
+*.pyc
+*.pyo
+__pycache__/
+*.egg-info/
+dist/
+build/
+
+# Virtual environment
+venv/
+
+# Database
+db.sqlite3
+users.db
+
+# Generated challenge files
+server_boot.log
+remediation_challenge/
+remediation_challenge.zip
+
+# IDE
+.vscode/
+.idea/
+.qodo/
+
+# OS
+Thumbs.db
+.DS_Store

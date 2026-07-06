@@ -1,0 +1,171 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block title %}PROJECT ENIGMA — {{ story.title }}{% endblock %}
+
+{% block extra_css %}
+    .story-detail { padding: 3rem 0 4rem; }
+    .story-detail .container { max-width: 900px; margin: 0 auto; padding: 0 2rem; }
+
+    .story-back {
+        display: inline-flex; align-items: center; gap: 0.5rem;
+        color: var(--text-muted); text-decoration: none;
+        font-family: var(--font-mono); font-size: 0.85rem;
+        margin-bottom: 2rem; transition: color var(--transition-fast);
+    }
+    .story-back:hover { color: var(--accent-cyan); }
+
+    .story-header { margin-bottom: 2rem; }
+    .story-title {
+        font-family: var(--font-mono); font-weight: 700;
+        font-size: clamp(1.5rem, 3vw, 2.2rem); margin-bottom: 0.75rem;
+    }
+    .story-meta {
+        display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+        color: var(--text-secondary); font-size: 0.85rem;
+    }
+    .story-actions {
+        display: flex; gap: 0.5rem; margin-left: auto;
+    }
+
+    .story-content {
+        background: var(--bg-card); border: 1px solid var(--border-subtle);
+        border-radius: 12px; padding: 2rem;
+        line-height: 1.8; color: var(--text-secondary); margin-bottom: 2.5rem;
+    }
+
+    .challenge-list-title {
+        display: flex; align-items: center; justify-content: space-between;
+        font-family: var(--font-mono); font-weight: 700;
+        font-size: 1.2rem; margin-bottom: 1.25rem; color: var(--text-primary);
+    }
+
+    .challenge-list { display: flex; flex-direction: column; gap: 0.75rem; }
+
+    .challenge-item {
+        display: flex; align-items: center; gap: 1rem;
+        padding: 1rem 1.25rem; background: var(--bg-card);
+        border: 1px solid var(--border-subtle); border-radius: 10px;
+        text-decoration: none; color: var(--text-primary);
+        transition: all var(--transition-normal);
+    }
+    .challenge-item:hover:not(.challenge-item-locked) {
+        background: var(--bg-card-hover);
+        border-color: rgba(148, 163, 184, 0.2);
+        transform: translateX(4px);
+    }
+    .challenge-item.challenge-item-solved { border-color: rgba(16, 185, 129, 0.3); }
+    .challenge-item.challenge-item-locked { opacity: 0.5; cursor: not-allowed; }
+
+    .challenge-item-level {
+        font-family: var(--font-mono); font-size: 0.75rem;
+        color: var(--text-muted); font-weight: 600; min-width: 2.5rem;
+    }
+    .challenge-item-info { flex: 1; }
+    .challenge-item-title {
+        font-family: var(--font-mono); font-weight: 600;
+        font-size: 0.9rem; margin-bottom: 0.2rem;
+    }
+    .challenge-item-progress {
+        font-size: 0.72rem; color: var(--text-muted);
+        font-family: var(--font-mono);
+    }
+    .challenge-item-status { font-size: 1.1rem; }
+    .challenge-item-status.solved { color: var(--accent-green); }
+    .challenge-item-status.locked { color: var(--text-muted); }
+    .challenge-item-status.in-progress { color: var(--status-medium); }
+
+    .story-files-section {
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 2.5rem;
+    }
+    .story-files-title {
+        font-family: var(--font-mono); font-weight: 600; font-size: 0.85rem;
+        color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em;
+        margin-bottom: 1rem;
+    }
+    .story-file-item {
+        display: inline-flex; align-items: center; gap: 0.5rem;
+        padding: 0.4rem 0.8rem; background: var(--bg-primary);
+        border: 1px solid var(--border-subtle); border-radius: 6px;
+        text-decoration: none; color: var(--text-primary);
+        font-family: var(--font-mono); font-size: 0.78rem;
+        margin-right: 0.4rem; margin-bottom: 0.4rem;
+        transition: all var(--transition-fast);
+    }
+    .story-file-item:hover { border-color: var(--accent-cyan); }
+{% endblock %}
+
+{% block content %}
+<div class="story-detail">
+    <div class="container">
+        <a href="{% url 'dashboard' %}" class="story-back">← Back to Dashboard</a>
+
+        <div class="story-header">
+            <h1 class="story-title">{{ story.title }}</h1>
+            <div class="story-meta">
+                <span>{{ challenges|length }} challenge{{ challenges|length|pluralize }}</span>
+                {% for tag in story.tags.all %}
+                <span class="story-card-tag">{{ tag.name }}</span>
+                {% endfor %}
+                <div class="story-actions">
+                    {% if user.is_staff %}
+                    <a href="{% url 'edit_story' story.id %}" class="btn btn-secondary" style="padding:0.3rem 0.8rem;font-size:0.7rem;">Edit Story</a>
+                    <a href="{% url 'create_challenge' story.id %}" class="btn btn-green" style="padding:0.3rem 0.8rem;font-size:0.7rem;">+ Challenge</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="story-content">
+            {{ story.content|linebreaks }}
+        </div>
+
+        <!-- Story-level files -->
+        {% with files=story.files.all %}
+        {% if files %}
+        <div class="story-files-section">
+            <h3 class="story-files-title">📁 Intelligence Files</h3>
+            {% for file in files %}
+            <a href="{% url 'download_story_file' file.id %}" class="story-file-item">
+                📄 {{ file.display_name }}
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <div class="challenge-list-title">
+            <span>🧩 Challenges</span>
+        </div>
+
+        <div class="challenge-list">
+            {% for challenge in challenges %}
+            <a href="{% url 'challenge_detail' challenge.id %}"
+               class="challenge-item
+                {% if challenge.is_solved %}challenge-item-solved{% endif %}
+                {% if challenge.is_locked %}challenge-item-locked{% endif %}"
+               {% if challenge.is_locked %}onclick="return false;"{% endif %}
+            >
+                <span class="challenge-item-level">Lv{{ challenge.level }}</span>
+                <div class="challenge-item-info">
+                    <div class="challenge-item-title">{{ challenge.title }}</div>
+                    <div class="challenge-item-progress">
+                        {{ challenge.tasks_done }}/{{ challenge.tasks_total }} tasks
+                    </div>
+                </div>
+                <span class="challenge-item-status
+                    {% if challenge.is_solved %}solved
+                    {% elif challenge.is_locked %}locked
+                    {% else %}in-progress{% endif %}">
+                    {% if challenge.is_solved %}✓
+                    {% elif challenge.is_locked %}🔒
+                    {% else %}⋯{% endif %}
+                </span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,359 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block title %}PROJECT ENIGMA — Crack the Code{% endblock %}
+
+{% block extra_css %}
+    /* ===== HERO SECTION ===== */
+    .hero {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        padding: 4rem 2rem;
+    }
+
+    .hero-bg-grid {
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+        background-size: 60px 60px;
+        z-index: 0;
+    }
+
+    .hero-bg-glow {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(0, 240, 255, 0.06) 0%, transparent 70%);
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        max-width: 800px;
+    }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        background: rgba(0, 240, 255, 0.08);
+        border: 1px solid rgba(0, 240, 255, 0.15);
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        color: var(--accent-cyan);
+        margin-bottom: 1.5rem;
+    }
+
+    .hero-badge-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--accent-green);
+        animation: pulseDot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulseDot {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
+    }
+
+    .hero-title {
+        font-family: var(--font-mono);
+        font-weight: 800;
+        font-size: clamp(2.5rem, 6vw, 4.5rem);
+        line-height: 1.1;
+        margin-bottom: 1.5rem;
+        letter-spacing: -0.02em;
+    }
+
+    .hero-title .highlight-cyan {
+        color: var(--accent-cyan);
+    }
+
+    .hero-title .highlight-green {
+        color: var(--accent-green);
+    }
+
+    .hero-subtitle {
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        max-width: 600px;
+        margin: 0 auto 2.5rem;
+        line-height: 1.7;
+    }
+
+    .hero-actions {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .hero-stats {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 3rem;
+        margin-top: 4rem;
+        flex-wrap: wrap;
+    }
+
+    .hero-stat {
+        text-align: center;
+    }
+
+    .hero-stat-value {
+        font-family: var(--font-mono);
+        font-weight: 800;
+        font-size: 1.8rem;
+        color: var(--text-primary);
+    }
+
+    .hero-stat-label {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-top: 0.25rem;
+    }
+
+    /* ===== FEATURES SECTION ===== */
+    .features {
+        padding: 6rem 0;
+        border-top: 1px solid var(--border-subtle);
+    }
+
+    .features .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .features .container > * {
+        width: 100%;
+    }
+
+    .section-label {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        color: var(--accent-cyan);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 0.75rem;
+        text-align: center;
+    }
+
+    .section-title {
+        font-family: var(--font-mono);
+        font-weight: 700;
+        font-size: clamp(1.8rem, 3vw, 2.5rem);
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .section-desc {
+        color: var(--text-secondary);
+        max-width: 600px;
+        margin: 0 auto;
+        font-size: 0.95rem;
+        line-height: 1.7;
+        text-align: center;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-top: 3rem;
+    }
+
+    .feature-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px;
+        padding: 2rem;
+        transition: all var(--transition-normal);
+    }
+
+    .feature-card:hover {
+        background: var(--bg-card-hover);
+        transform: translateY(-2px);
+        border-color: rgba(148, 163, 184, 0.2);
+        box-shadow: var(--shadow-card);
+    }
+
+    .feature-icon {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .feature-title {
+        font-family: var(--font-mono);
+        font-weight: 700;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .feature-desc {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        line-height: 1.6;
+    }
+
+    /* ===== CTA SECTION ===== */
+    .cta-section {
+        padding: 5rem 0;
+        text-align: center;
+        border-top: 1px solid var(--border-subtle);
+    }
+
+    .cta-title {
+        font-family: var(--font-mono);
+        font-weight: 700;
+        font-size: clamp(1.5rem, 3vw, 2rem);
+        margin-bottom: 1rem;
+    }
+
+    .cta-desc {
+        color: var(--text-secondary);
+        max-width: 500px;
+        margin: 0 auto 2rem;
+        font-size: 0.95rem;
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+        padding: 2rem 0;
+        border-top: 1px solid var(--border-subtle);
+        text-align: center;
+    }
+
+    .footer-text {
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        color: var(--text-muted);
+    }
+
+    .footer-text .heart {
+        color: var(--status-hard);
+    }
+{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-bg-glow"></div>
+    <div class="hero-content">
+        <div class="hero-badge animate-in">
+            <span class="hero-badge-dot"></span>
+            v1.0 — Now Open for Recruitment
+        </div>
+        <h1 class="hero-title animate-in animate-in-delay-1">
+            Decode the<br>
+            <span class="highlight-cyan">PROJECT</span><span class="highlight-green">.</span><span class="highlight-cyan">ENIGMA</span>
+        </h1>
+        <p class="hero-subtitle animate-in animate-in-delay-2">
+            A cyberpunk-themed CTF challenge platform. Crack ciphers, reverse hashes, 
+            break encryption — and climb the leaderboard.
+        </p>
+        <div class="hero-actions animate-in animate-in-delay-3">
+            <a href="{% url 'register' %}" class="btn btn-primary">⚡ Start Cracking</a>
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary">📂 View Missions</a>
+        </div>
+        <div class="hero-stats animate-in animate-in-delay-4">
+            <div class="hero-stat">
+                <div class="hero-stat-value">{{ challenge_count }}</div>
+                <div class="hero-stat-label">Challenges</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value">{{ category_count }}</div>
+                <div class="hero-stat-label">Categories</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value">{{ active_agents }}</div>
+                <div class="hero-stat-label">Active Agents</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+    <div class="container">
+        <p class="section-label animate-in">// Capabilities</p>
+        <h2 class="section-title animate-in animate-in-delay-1">Your Arsenal</h2>
+        <p class="section-desc animate-in animate-in-delay-2">
+            Every mission is a story. Every challenge sharpens your edge. 
+            Master the three pillars of cryptographic warfare.
+        </p>
+        <div class="features-grid">
+            <div class="feature-card animate-in animate-in-delay-1">
+                <span class="feature-icon">💻</span>
+                <h3 class="feature-title">Coding</h3>
+                <p class="feature-desc">
+                    Write exploits, parse protocols, automate decryption. 
+                    Python, Bash, and raw logic — your keyboard is your weapon.
+                </p>
+            </div>
+            <div class="feature-card animate-in animate-in-delay-2">
+                <span class="feature-icon">🔑</span>
+                <h3 class="feature-title">Hashing</h3>
+                <p class="feature-desc">
+                    MD5, SHA, bcrypt — identify, crack, and reverse. 
+                    Hashcat and rainbow tables are just the beginning.
+                </p>
+            </div>
+            <div class="feature-card animate-in animate-in-delay-3">
+                <span class="feature-icon">🔐</span>
+                <h3 class="feature-title">Encryption</h3>
+                <p class="feature-desc">
+                    AES, RSA, Vigenère, XOR — break classical and modern 
+                    ciphers. The math is the key.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+    <div class="container">
+        <h2 class="cta-title animate-in">Ready to Join the Network?</h2>
+        <p class="cta-desc animate-in animate-in-delay-1">
+            Create your agent profile and start your first mission. 
+            The terminal is waiting.
+        </p>
+        <div class="animate-in animate-in-delay-2">
+            <a href="{% url 'register' %}" class="btn btn-green">🚀 Deploy Agent</a>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <div class="container">
+        <p class="footer-text">
+            [ PROJECT<span style="color:var(--accent-green);">.</span>ENIGMA ] &nbsp;·&nbsp; 
+            Built with <span class="heart">♥</span> for codebreakers &nbsp;·&nbsp; 
+            <span style="color:var(--text-muted);">v1.0.0</span>
+        </p>
+    </div>
+</footer>
+{% endblock %}

@@ -1,0 +1,309 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block title %}PROJECT ENIGMA — Mission Dashboard{% endblock %}
+
+{% block extra_css %}
+    /* ===== DASHBOARD LAYOUT ===== */
+    .dashboard {
+        padding: 2rem 0 4rem;
+    }
+
+    /* ===== FILTER BAR ===== */
+    .filter-bar {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1.25rem 0;
+        flex-wrap: wrap;
+        border-bottom: 1px solid var(--border-subtle);
+        margin-bottom: 2rem;
+    }
+
+    .filter-label {
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-right: 0.5rem;
+    }
+
+    .filter-clear {
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        border: 1px solid transparent;
+        transition: all var(--transition-fast);
+        background: none;
+    }
+
+    .filter-clear:hover {
+        color: var(--text-secondary);
+        border-color: var(--border-subtle);
+    }
+
+
+
+    /* ===== STORY GRID ===== */
+    .story-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 1.25rem;
+    }
+
+    .story-grid-empty {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-muted);
+    }
+
+    .story-grid-empty-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .story-grid-empty-text {
+        font-family: var(--font-mono);
+        font-size: 0.9rem;
+    }
+
+    /* ===== DASHBOARD HEADER ===== */
+    .dashboard-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .dashboard-title {
+        font-family: var(--font-mono);
+        font-weight: 700;
+        font-size: clamp(1.5rem, 3vw, 2rem);
+    }
+
+    .dashboard-title .accent {
+        color: var(--accent-cyan);
+    }
+
+    .dashboard-progress-summary {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    .dashboard-progress-item {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .dashboard-progress-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+    }
+
+    .dashboard-progress-dot.solved { background: var(--status-easy); }
+    .dashboard-progress-dot.in-progress { background: var(--status-medium); }
+    .dashboard-progress-dot.locked { background: var(--status-locked); }
+
+    /* ===== CENTERING FIXES ===== */
+    .dashboard > .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .dashboard > .container > * {
+        width: 100%;
+    }
+
+    .story-grid {
+        justify-content: center;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+        .story-grid {
+            grid-template-columns: 1fr;
+        }
+        .dashboard-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .dashboard-progress-summary {
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+    }
+{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="container">
+        <!-- DASHBOARD HEADER -->
+        <div class="dashboard-header">
+            <div>
+                <p class="section-label">// Operations</p>
+                <h1 class="dashboard-title">
+                    Mission <span class="accent">Dashboard</span>
+                </h1>
+            </div>
+            <div style="display:flex;align-items:center;gap:1rem;">
+                {% if user.is_staff %}
+                <a href="{% url 'create_story' %}" class="btn btn-primary" style="padding:0.4rem 1rem;font-size:0.8rem;">
+                    + New Story
+                </a>
+                {% endif %}
+                <div class="dashboard-progress-summary">
+                <div class="dashboard-progress-item">
+                    <span class="dashboard-progress-dot solved"></span>
+                    <span>{{ solved_count|default:"0" }} Solved</span>
+                </div>
+                <div class="dashboard-progress-item">
+                    <span class="dashboard-progress-dot in-progress"></span>
+                    <span>{{ in_progress_count|default:"0" }} In Progress</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- FILTER BAR -->
+        <div class="filter-bar">
+            <span class="filter-label">Filter:</span>
+            <span class="filter-label" style="margin-left:0.5rem;color:var(--text-muted);">Tags</span>
+            {% for tag in tags %}
+            <button class="tag-badge tag-badge-{{ tag.name|lower }}" data-tag="{{ tag.name|lower }}" onclick="filterStories('{{ tag.name|lower }}')" style="background:{{ tag.color }}22;color:{{ tag.color }}">
+                {{ tag.name }}
+            </button>
+            {% endfor %}
+            <span class="filter-label" style="margin-left:0.5rem;color:var(--text-muted);">Difficulty</span>
+            {% for value, label in difficulties %}
+            <button class="tag-badge diff-{{ value }}" data-difficulty="{{ value }}" onclick="filterDifficulty('{{ value }}')">
+                ● {{ label }}
+            </button>
+            {% endfor %}
+            <button class="filter-clear" onclick="clearFilter()">✕ Clear</button>
+        </div>
+
+        <!-- STORY GRID -->
+        <div class="story-grid" id="storyGrid">
+            {% for story in stories %}
+            <div class="story-card 
+                {% if story.is_solved %}solved{% endif %}
+                {% if story.is_locked %}locked{% endif %}
+                animate-in"
+                data-tags="{% for tag in story.tags.all %}{{ tag.name|lower }}{% if not forloop.last %} {% endif %}{% endfor %}"
+                data-difficulty="{{ story.difficulty }}"
+                onclick="{% if not story.is_locked %}window.location.href='{% url 'story_detail' story.id %}'{% endif %}"
+                style="animation-delay: {{ forloop.counter0|add:'1'|divisibleby:'5'|yesno:'0.1,0.2,0.3,0.4,0.5' }}s;"
+            >
+                {% if story.is_locked %}
+                <div class="story-card-overlay">
+                    <span class="story-card-lock-icon">🔒</span>
+                </div>
+                {% endif %}
+
+                <div class="story-card-header">
+                    <h3 class="story-card-title">{{ story.title }}</h3>
+                    <div style="display:flex;align-items:center;gap:0.5rem;">
+                        <span class="story-card-tag diff-{{ story.difficulty }}" style="font-size:0.7rem;text-transform:uppercase;">{{ story.get_difficulty_display }}</span>
+                        {% if story.is_solved %}
+                        <span style="color:var(--status-easy);font-size:1.1rem;">✓</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="story-card-tags">
+                    {% for tag in story.tags.all %}
+                    <span class="story-card-tag">{{ tag.name }}</span>
+                    {% endfor %}
+                </div>
+
+                <p class="story-card-desc">{{ story.content|truncatewords:25 }}</p>
+
+                <div class="story-card-footer">
+                    <span class="story-card-difficulty">
+                        {% if story.is_solved %}
+                        <span class="status-dot easy"></span>
+                        <span class="status-easy">Solved</span>
+                        {% elif story.is_locked %}
+                        <span class="status-dot locked"></span>
+                        <span class="status-locked">Locked</span>
+                        {% else %}
+                        <span class="status-dot medium"></span>
+                        <span class="status-medium">In Progress</span>
+                        {% endif %}
+                    </span>
+                    <span class="story-card-xp">{{ story.challenges.count }} challenges</span>
+                </div>
+            </div>
+            {% empty %}
+            <div class="story-grid-empty">
+                <div class="story-grid-empty-icon">📁</div>
+                <p class="story-grid-empty-text">No missions available yet. Check back soon.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let activeTag = null;
+    let activeDifficulty = null;
+
+    function filterStories(tag) {
+        activeTag = tag;
+        applyFilters();
+        // Highlight active tag badge
+        document.querySelectorAll('.tag-badge[data-tag]').forEach(b => b.classList.remove('active'));
+        document.querySelector(`.tag-badge[data-tag="${tag}"]`)?.classList.add('active');
+        document.querySelectorAll('.tag-badge[data-difficulty]').forEach(b => b.classList.remove('active'));
+    }
+
+    function filterDifficulty(value) {
+        activeDifficulty = value;
+        applyFilters();
+        // Highlight active difficulty badge
+        document.querySelectorAll('.tag-badge[data-difficulty]').forEach(b => b.classList.remove('active'));
+        document.querySelector(`.tag-badge[data-difficulty="${value}"]`)?.classList.add('active');
+        document.querySelectorAll('.tag-badge[data-tag]').forEach(b => b.classList.remove('active'));
+    }
+
+    function applyFilters() {
+        const cards = document.querySelectorAll('.story-card');
+        cards.forEach(card => {
+            let show = true;
+            if (activeTag) {
+                const cardTags = (card.dataset.tags || '').toLowerCase();
+                if (!cardTags.includes(activeTag)) show = false;
+            }
+            if (activeDifficulty) {
+                if (card.dataset.difficulty !== activeDifficulty) show = false;
+            }
+            card.style.display = show ? '' : 'none';
+        });
+    }
+
+    function clearFilter() {
+        activeTag = null;
+        activeDifficulty = null;
+        const cards = document.querySelectorAll('.story-card');
+        const badges = document.querySelectorAll('.tag-badge');
+        badges.forEach(b => b.classList.remove('active'));
+        cards.forEach(card => { card.style.display = ''; });
+    }
+</script>
+{% endblock %}

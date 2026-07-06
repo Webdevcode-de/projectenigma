@@ -1,0 +1,12 @@
+AGENT LOG — Classification: UNCLASSIFIED
+
+OPERATION: File Recon
+STATUS: Complete
+
+Notes:
+The flag for this challenge is embedded below.
+Look carefully — sometimes the answer is right in front of you.
+
+ENIGMA{file_recon_complete}
+
+Remember to only submit the value inside the braces.

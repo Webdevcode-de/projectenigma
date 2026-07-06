@@ -1,0 +1,406 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block title %}PROJECT ENIGMA — {{ challenge.title }}{% endblock %}
+
+{% block topbar %}{% endblock %}
+
+{% block extra_css %}
+    .main-content { padding-top: 0; }
+
+    .challenge-page { flex: 1; display: flex; flex-direction: column; }
+
+    /* Top Nav */
+    .challenge-topbar {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 0.75rem 2rem; background: var(--bg-secondary);
+        border-bottom: 1px solid var(--border-subtle); flex-shrink: 0;
+    }
+    .challenge-topbar-left { display: flex; align-items: center; gap: 1rem; }
+    .challenge-topbar-logo {
+        font-family: var(--font-mono); font-weight: 800; font-size: 0.9rem;
+        color: var(--accent-cyan); text-decoration: none;
+    }
+    .challenge-topbar-logo:hover { color: #33f3ff; }
+    .challenge-breadcrumb {
+        display: flex; align-items: center; gap: 0.5rem;
+        font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-muted);
+    }
+    .challenge-breadcrumb a { color: var(--text-muted); text-decoration: none; }
+    .challenge-breadcrumb a:hover { color: var(--accent-cyan); }
+    .challenge-breadcrumb .sep { color: var(--text-muted); opacity: 0.4; }
+    .challenge-topbar-right { display: flex; align-items: center; gap: 1rem; }
+    .challenge-topbar-user { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-secondary); }
+    .challenge-topbar-xp {
+        font-family: var(--font-mono); font-size: 0.8rem;
+        color: var(--accent-cyan); background: rgba(0, 240, 255, 0.08);
+        padding: 0.25rem 0.7rem; border-radius: 6px;
+        border: 1px solid rgba(0, 240, 255, 0.15);
+    }
+
+    /* Two-column split */
+    .challenge-split { flex: 1; display: flex; overflow: hidden; }
+
+    /* Left Panel — Briefing */
+    .challenge-briefing {
+        width: 45%; flex-shrink: 0; overflow-y: auto; padding: 2rem;
+        border-right: 1px solid var(--border-subtle);
+    }
+    .challenge-briefing-header { margin-bottom: 1.5rem; }
+    .challenge-briefing-level {
+        font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);
+        text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem;
+    }
+    .challenge-briefing-title {
+        font-family: var(--font-mono); font-weight: 700;
+        font-size: 1.4rem; margin-bottom: 0.75rem; line-height: 1.3;
+    }
+    .challenge-briefing-meta { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+    .challenge-badge {
+        display: inline-flex; align-items: center; gap: 0.35rem;
+        padding: 0.2rem 0.65rem; border-radius: 4px;
+        font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500;
+        text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .challenge-badge-tag { background: rgba(148, 163, 184, 0.1); color: var(--text-muted); }
+    .challenge-badge-solved { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
+    .challenge-briefing-text { color: var(--text-secondary); line-height: 1.8; font-size: 0.92rem; }
+    .challenge-briefing-text p { margin-bottom: 1rem; }
+
+    /* Story Files */
+    .story-files-section { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-subtle); }
+    .story-files-title {
+        font-family: var(--font-mono); font-weight: 600; font-size: 0.78rem;
+        color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em;
+        margin-bottom: 0.75rem;
+    }
+    .story-file-item {
+        display: flex; align-items: center; gap: 0.6rem;
+        padding: 0.5rem 0.75rem; background: var(--bg-primary);
+        border: 1px solid var(--border-subtle); border-radius: 6px;
+        text-decoration: none; color: var(--text-primary);
+        font-family: var(--font-mono); font-size: 0.78rem;
+        margin-bottom: 0.4rem; transition: all var(--transition-fast);
+    }
+    .story-file-item:hover { border-color: var(--accent-cyan); }
+
+    /* Right Panel — Task Workbench */
+    .challenge-workbench {
+        width: 55%; flex-shrink: 0; overflow-y: auto;
+        display: flex; flex-direction: column;
+    }
+
+    /* progress bar */
+    .challenge-progress-bar {
+        display: flex; align-items: center; gap: 0.75rem;
+        padding: 1rem 2rem; border-bottom: 1px solid var(--border-subtle);
+        background: rgba(0,240,255,0.02);
+    }
+    .progress-track {
+        flex: 1; height: 6px; background: var(--bg-primary);
+        border-radius: 3px; overflow: hidden;
+    }
+    .progress-fill {
+        height: 100%; background: var(--accent-green);
+        border-radius: 3px; transition: width 0.3s ease;
+    }
+    .progress-label {
+        font-family: var(--font-mono); font-size: 0.75rem;
+        color: var(--text-secondary); white-space: nowrap;
+    }
+
+    /* Task Card */
+    .task-section { padding: 1.5rem 2rem; }
+    .task-section + .task-section { border-top: 1px solid var(--border-subtle); }
+    .task-header {
+        display: flex; align-items: flex-start; gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    .task-index {
+        font-family: var(--font-mono); font-size: 1.8rem; font-weight: 700;
+        color: var(--text-muted); line-height: 1; min-width: 2rem;
+        opacity: 0.4;
+    }
+    .task-info { flex: 1; }
+    .task-title {
+        font-family: var(--font-mono); font-weight: 600; font-size: 1rem;
+        margin-bottom: 0.25rem;
+    }
+    .task-meta {
+        display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center;
+    }
+    .task-badge {
+        font-family: var(--font-mono); font-size: 0.65rem; padding: 0.15rem 0.5rem;
+        border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .task-badge-solved { background: rgba(16,185,129,0.15); color: var(--accent-green); }
+    .task-badge-unsolved { background: rgba(245,158,11,0.12); color: var(--status-medium); }
+    .task-description {
+        color: var(--text-secondary); line-height: 1.7; font-size: 0.88rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Task Files */
+    .task-files { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem; }
+    .task-file-link {
+        display: inline-flex; align-items: center; gap: 0.3rem;
+        padding: 0.3rem 0.65rem; background: var(--bg-primary);
+        border: 1px solid var(--border-subtle); border-radius: 5px;
+        font-family: var(--font-mono); font-size: 0.72rem;
+        color: var(--text-secondary); text-decoration: none;
+        transition: all var(--transition-fast);
+    }
+    .task-file-link:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+
+    /* Flag Input per task */
+    .flag-input-group {
+        display: flex; align-items: center;
+        background: var(--bg-primary); border: 1px solid var(--border-subtle);
+        border-radius: 8px; overflow: hidden;
+        transition: border-color var(--transition-fast);
+        max-width: 480px;
+    }
+    .flag-input-group:focus-within { border-color: var(--accent-cyan); box-shadow: 0 0 0 3px rgba(0,240,255,0.1); }
+    .flag-prefix, .flag-suffix {
+        font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent-cyan);
+        padding: 0.55rem 0.65rem; background: rgba(0,240,255,0.06);
+        white-space: nowrap; user-select: none; font-weight: 600;
+    }
+    .flag-input {
+        flex: 1; border: none; background: transparent;
+        padding: 0.55rem 0.65rem; font-family: var(--font-mono);
+        font-size: 0.85rem; color: var(--text-primary); outline: none; min-width: 0;
+    }
+    .flag-input::placeholder { color: var(--text-muted); font-size: 0.75rem; }
+    .flag-input:disabled { opacity: 0.5; cursor: not-allowed; }
+    .flag-actions { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+    .flag-format-hint {
+        font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted);
+        margin-top: 0.4rem;
+    }
+
+    /* Feedback */
+    .feedback-zone { padding: 1rem 2rem; border-top: 1px solid var(--border-subtle); display: none; }
+    .feedback-zone.visible { display: block; }
+    .feedback-zone.correct { background: rgba(16,185,129,0.08); border-top-color: rgba(16,185,129,0.2); }
+    .feedback-zone.incorrect { background: rgba(239,68,68,0.08); border-top-color: rgba(239,68,68,0.2); }
+    .feedback-content { display: flex; align-items: center; gap: 0.75rem; }
+    .feedback-icon { font-size: 1.3rem; }
+    .feedback-text { font-family: var(--font-mono); font-size: 0.85rem; font-weight: 500; }
+    .feedback-text.correct { color: var(--accent-green); }
+    .feedback-text.incorrect { color: var(--status-hard); }
+    .feedback-next-btn { margin-left: auto; }
+
+    @media (max-width: 900px) {
+        .challenge-split { flex-direction: column; overflow-y: auto; }
+        .challenge-briefing, .challenge-workbench { width: 100%; border-right: none; }
+        .challenge-briefing { border-bottom: 1px solid var(--border-subtle); }
+    }
+{% endblock %}
+
+{% block content %}
+<div class="challenge-page">
+    <!-- Top Nav -->
+    <div class="challenge-topbar">
+        <div class="challenge-topbar-left">
+            <a href="{% url 'dashboard' %}" class="challenge-topbar-logo">[PROJECT.ENIGMA]</a>
+            <div class="challenge-breadcrumb">
+                <a href="{% url 'dashboard' %}">Dashboard</a>
+                <span class="sep">›</span>
+                <a href="{% url 'story_detail' story.id %}">{{ story.title }}</a>
+                <span class="sep">›</span>
+                <span style="color:var(--text-secondary);">{{ challenge.title }}</span>
+            </div>
+        </div>
+        <div class="challenge-topbar-right">
+            <div class="challenge-topbar-xp">⚡ {{ total_xp }} XP</div>
+            <div class="challenge-topbar-user">
+                <div class="topbar-avatar" style="width:28px;height:28px;font-size:0.7rem;">{{ user.username|first|upper }}</div>
+                <span>{{ user.username }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Two-column split -->
+    <div class="challenge-split">
+
+        <!-- Left Panel: Briefing -->
+        <div class="challenge-briefing">
+            <div class="challenge-briefing-header">
+                <div class="challenge-briefing-level">Level {{ challenge.level }} · Challenge {{ challenge.order }}</div>
+                <h1 class="challenge-briefing-title">{{ challenge.title }}</h1>
+                <div class="challenge-briefing-meta">
+                    {% for tag in story.tags.all %}
+                    <span class="challenge-badge challenge-badge-tag">{{ tag.name }}</span>
+                    {% endfor %}
+                    <span class="challenge-badge diff-{{ story.difficulty }}">● {{ story.get_difficulty_display }}</span>
+                </div>
+            </div>
+
+            {% if challenge.description %}
+            <div class="challenge-briefing-text">
+                {{ challenge.description|linebreaks }}
+            </div>
+            {% endif %}
+
+            <!-- Story-global files -->
+            {% with story_files=story.files.all %}
+            {% if story_files or story_task_files %}
+            <div class="story-files-section">
+                <h3 class="story-files-title">📁 Story Files</h3>
+                {% for file in story_files %}
+                <a href="{% url 'download_story_file' file.id %}" class="story-file-item">
+                    <span>📄</span>
+                    <span style="flex:1;">{{ file.display_name }}</span>
+                    <span style="font-size:0.7rem;color:var(--text-muted);">Download</span>
+                </a>
+                {% endfor %}
+                {% for tf in story_task_files %}
+                <a href="{% url 'download_challenge_file' tf.id %}" class="story-file-item">
+                    <span>📄</span>
+                    <span style="flex:1;">{{ tf.display_name }}</span>
+                    <span style="font-size:0.7rem;color:var(--text-secondary);">{{ tf.task.challenge.title }} / {{ tf.task.title }}</span>
+                    <span style="font-size:0.7rem;color:var(--text-muted);">Download</span>
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+        </div>
+
+        <!-- Right Panel: Tasks -->
+        <div class="challenge-workbench">
+
+            <!-- Progress -->
+            {% with total=challenge.tasks.all|length %}
+            {% if total > 0 %}
+            <div class="challenge-progress-bar">
+                <span class="progress-label">Tasks</span>
+                <div class="progress-track">
+                    <div class="progress-fill" style="width:{% widthratio tasks_done total 100 %}%"></div>
+                </div>
+                <span class="progress-label">{{ tasks_done }}/{{ total }}</span>
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            <div style="flex:1;">
+            {% for td in tasks_data %}
+                {% with task=td.task prog=td.progression %}
+                <div class="task-section" id="task-{{ task.id }}">
+                    <div class="task-header">
+                        <span class="task-index">{{ forloop.counter }}</span>
+                        <div class="task-info">
+                            <div class="task-title">{{ task.title }}</div>
+                            <div class="task-meta">
+                                {% if prog.completed %}
+                                <span class="task-badge task-badge-solved">✓ Solved</span>
+                                {% else %}
+                                <span class="task-badge task-badge-unsolved">⋯ Unsolved</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="task-description">{{ task.description|linebreaks }}</div>
+
+                    <!-- Task files -->
+                    {% with files=task.files.all %}
+                    {% if files %}
+                    <div class="task-files">
+                        {% for file in files %}
+                        <a href="{% url 'download_challenge_file' file.id %}" class="task-file-link">📄 {{ file.display_name }}</a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+
+                    <!-- Flag input -->
+                    <form method="post" action="{% url 'challenge_detail' challenge.id %}" style="margin-top:0.5rem;">
+                        {% csrf_token %}
+                        <input type="hidden" name="task_id" value="{{ task.id }}">
+                        <div class="flag-input-group">
+                            <span class="flag-prefix">{{ ENIGMA_PREFIX }}</span>
+                            <input type="text" name="flag" class="flag-input"
+                                placeholder="enter_flag_here" autocomplete="off" spellcheck="false"
+                                {% if prog.completed %}value="{{ td.solved_flag }}" disabled{% endif %}
+                                required>
+                            <span class="flag-suffix">{{ ENIGMA_SUFFIX }}</span>
+                        </div>
+                        {% if td.answer_format and not prog.completed %}
+                        <div class="flag-format-hint">
+                            Expected format: <code style="color:var(--text-secondary);background:var(--bg-card);padding:0.1rem 0.4rem;border-radius:4px;">{{ td.answer_format }}</code>
+                        </div>
+                        {% endif %}
+                        <div class="flag-actions">
+                            <button type="submit" class="btn btn-primary" style="padding:0.4rem 1rem;font-size:0.8rem;" {% if prog.completed %}disabled{% endif %}>
+                                🔍 Check Flag
+                            </button>
+                            {% if prog.completed %}
+                            <button type="submit" name="reset_task" value="1" class="btn btn-secondary" style="padding:0.4rem 1rem;font-size:0.8rem;border-color:rgba(239,68,68,0.3);color:var(--status-hard);">
+                                ↻ Redo
+                            </button>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+                {% endwith %}
+            {% empty %}
+                <div style="padding:3rem 2rem;text-align:center;color:var(--text-muted);">
+                    <p style="font-family:var(--font-mono);font-size:0.9rem;">No tasks defined for this challenge yet.</p>
+                </div>
+            {% endfor %}
+            </div>
+
+            <!-- Reset all -->
+            {% if tasks_data %}
+            <div style="padding:0.75rem 2rem;border-top:1px solid var(--border-subtle);">
+                <form method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" name="reset_all" value="1" class="btn btn-secondary" style="padding:0.35rem 0.9rem;font-size:0.75rem;border-color:rgba(239,68,68,0.3);color:var(--status-hard);">
+                        ↻ Reset All Progress
+                    </button>
+                </form>
+                <a href="{% url 'story_detail' story.id %}" class="btn btn-secondary" style="padding:0.35rem 0.9rem;font-size:0.75rem;margin-left:0.5rem;">
+                    ← Back to Story
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- Feedback zone -->
+            <div class="feedback-zone {% if result %}visible {{ result }}{% endif %}" id="feedbackZone">
+                <div class="feedback-content">
+                    {% if result == 'correct' %}
+                    <span class="feedback-icon">✅</span>
+                    <span class="feedback-text correct">Access granted. +{{ earned_xp }} XP</span>
+                    {% elif result == 'incorrect' %}
+                    <span class="feedback-icon">❌</span>
+                    <span class="feedback-text incorrect">Access denied. Flag incorrect.</span>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const feedback = document.getElementById('feedbackZone');
+        if (feedback && feedback.classList.contains('incorrect')) {
+            setTimeout(function() {
+                feedback.classList.remove('visible', 'incorrect');
+            }, 5000);
+        }
+        // Scroll to the target task if there was a submission
+        const params = new URLSearchParams(window.location.search);
+        const taskId = params.get('task');
+        if (taskId) {
+            const el = document.getElementById('task-' + taskId);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
+</script>
+{% endblock %}
